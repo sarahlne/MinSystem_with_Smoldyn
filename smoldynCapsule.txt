@@ -1,0 +1,104 @@
+graphics opengl
+graphic_iter 1
+
+# dimensionality and species
+
+dim 3
+species MinDATP MinDADP MinDmem MinE MinDE
+
+# output of time and number of molecules per species in graphical output
+
+text_display time MinDATP MinDADP MinDmem(front) MinE MinDE(front)
+
+# diffusion coefficients
+
+difc MinDATP(all) 2.5
+difc MinDADP(all) 2.5
+difc MinDmem(all) 0.01
+difc MinE(all) 2.5
+difc MinDE(all) 0.01
+
+# information for graphical output
+
+color MinDATP(all) 1 0 0
+color MinDADP(all) 1 0 0
+color MinE(all) 0 1 0
+color MinDmem(all) 0 0 1
+color MinDE(all) orange
+
+display_size MinDATP(all) 0
+display_size MinDADP(all) 0
+display_size MinDmem(all) 3
+display_size MinE(all) 0
+display_size MinDE(all) 3
+
+# run time parameters
+
+time_start 0
+time_stop 1200
+time_step 0.0005
+
+# simulation geometry
+
+boundaries 0 0 30 r
+boundaries 1 0 30 r
+boundaries 2 0 30 r
+frame_thickness 0
+
+max_surface 1
+start_surface box
+action all both reflect
+color both 0.5 0.5 0.5
+polygon both edge
+panel rect +0 -10 0 0 20 20
+panel rect -0 20 0 0 20 20
+panel rect +1 -10 0 0 30 20
+panel rect -1 -10 20 0 30 20
+panel rect +2 -10 0 0 30 20
+panel rect -2 -10 0 20 30 20
+end_surface
+
+start_surface reactivepatches
+action all both reflect
+rate MinDATP fsoln front 0.025 MinDmem
+color both magenta 0.1
+thickness 2
+polygon front face
+polygon back face
+panel cyl 10 10 10 0 10 10 2.5 30 10
+panel hemi 0 10 10 2.5 1 0 0 30 10
+panel hemi 10 10 10 2.5 -1 0 0 30 10
+#panel sph 10 10 10 5 2.5 2.5 50 sph1
+#panel rect +2 0 0 0 10 5
+end_surface
+
+start_compartment main
+surface box
+point 5. 2.5 0.25
+end_compartment
+
+# initial conditions
+
+compartment_mol 6003 MinDADP main
+compartment_mol 6003 MinDATP main
+compartment_mol 3120 MinE main
+
+# reactions
+
+reaction_surface reactivepatches r3 MinDATP(fsoln) + MinDmem(front) -> MinDmem(front) + MinDmem(front) 0.0149
+reaction_surface reactivepatches r4 MinE(fsoln) + MinDmem(front) -> MinDE(front) 0.0930
+reaction_surface reactivepatches r5 MinDE(front) -> MinDADP(fsoln) + MinE(fsoln) 0.7
+reaction r1 MinDADP -> MinDATP 0.5
+
+
+#output_root results_Min/
+#output_files histogram.txt
+#cmd e molcountspace MinDmem(all) 0 0 10 1000 1 histogram.txt
+#cmd N 1 molpos MinDmem(all) histogram.txt
+#cmd e molcountonsurf reactivepatches histogram.txt
+
+#tiff_iter 10000.0
+#tiff_name min_sys
+
+end_file
+
